@@ -1,3 +1,6 @@
 # Project exclude paths
 /out/
 /target/
+/res/
+/src/main/java/META-INF/
+/DungeonMaster.iml
