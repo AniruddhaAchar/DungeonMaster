@@ -27,8 +27,8 @@ import pdp.aniachar.view.TextView;
 
 public class Driver2 {
   private static Game model;
-  static private Appendable viewLogger;
-  static private Readable in;
+  private static  Appendable viewLogger;
+  private static  Readable in;
 
   /**
    * Entry point for the driver.

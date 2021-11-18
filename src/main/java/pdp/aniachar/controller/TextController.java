@@ -210,7 +210,7 @@ public class TextController implements IController {
   }
 
   /**
-   * This is a cheat in the game!
+   * This is a cheat in the game.
    *
    * @param otyughsRoarEvent Gets the location of all the monsters in the game.
    */

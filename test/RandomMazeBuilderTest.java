@@ -62,16 +62,6 @@ public class RandomMazeBuilderTest {
     EventContainer.getModelEventBus().register(this);
   }
 
-//  @After
-//  public void cleanup() {
-//    isWrapped = null;
-//    world = null;
-//    visitedNodes = null;
-//    numberTreasure = null;
-//    numberOfCaves = null;
-//    buildStrategy = null;
-//    monsterCount = null;
-//  }
 
   @Test()
   public void testBadInit() {
@@ -269,6 +259,12 @@ public class RandomMazeBuilderTest {
     assertTrue(notMonsterAtStart);
     assertTrue(monsterAtEnd);
   }
+
+  /**
+   * Subscribe to monster roar event.
+   *
+   * @param roarEvent The roar event.
+   */
 
   @Subscribe
   public void countMonsters(RoarEvent<Otyughs> roarEvent) {

@@ -40,7 +40,10 @@ public class PlayerTest {
 
   Character player;
 
-  IMazeLocation location, location2, location3, location4;
+  IMazeLocation location;
+  IMazeLocation location2;
+  IMazeLocation location3;
+  IMazeLocation location4;
   List<Item> items;
   Item arrow;
   Character monster;

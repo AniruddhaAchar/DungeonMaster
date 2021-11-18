@@ -9,8 +9,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import pdp.aniachar.dungeonmaster.comm.EventContainer;
 import pdp.aniachar.dungeonmaster.comm.ArrowHitEvent;
+import pdp.aniachar.dungeonmaster.comm.EventContainer;
 import pdp.aniachar.dungeonmaster.gameworld.IMazeLocation;
 import pdp.aniachar.dungeonmaster.gameworld.IMazeLocationBuilder;
 import pdp.aniachar.dungeonmaster.gameworld.MazeLocation;
@@ -193,6 +193,12 @@ public class ShootArrowActionTest {
     assertEquals(50d, eventPayload.getRight(), 0);
 
   }
+
+  /**
+   * Subscribe to getHitEvent.
+   *
+   * @param event The hit event.
+   */
 
   @Subscribe
   public void getHitEvent(ArrowHitEvent event) {

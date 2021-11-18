@@ -112,8 +112,7 @@ public class IMazeLocationBuilder {
       for (MoveAction action :
               currentLocation.getMoveAction()) {
         var adjLocation = (IMazeLocation) action.act().orElseThrow();
-        distanceMap.computeIfAbsent(adjLocation,
-                value -> distanceMap.get(currentLocation) + 1);
+        distanceMap.computeIfAbsent(adjLocation, value -> distanceMap.get(currentLocation) + 1);
         queue.add((IMazeLocation) action.act().orElseThrow());
       }
       queue.removeAll(visited);
