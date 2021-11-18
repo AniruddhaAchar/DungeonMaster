@@ -1,65 +1,73 @@
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.io.InputStreamReader;
+import java.util.concurrent.Callable;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import pdp.aniachar.dungeonmaster.action.location.MoveAction;
+import pdp.aniachar.controller.IController;
+import pdp.aniachar.controller.TextController;
+import pdp.aniachar.dungeonmaster.DungeonGame;
 import pdp.aniachar.dungeonmaster.gameworld.RandomMazeBuilder;
-import pdp.aniachar.gamekit.Action;
-import pdp.aniachar.gamekit.GameWorld;
-import pdp.aniachar.gamekit.Location;
+import pdp.aniachar.gamekit.Game;
+import pdp.aniachar.gamekit.WorldBuildStrategy;
+import pdp.aniachar.view.IView;
+import pdp.aniachar.view.TextView;
+import picocli.CommandLine;
+
+/**
+ * A driver class to demonstrate how the model works.
+ */
+
 public class Driver {
+  /**
+   * The entry point for the driver.
+   *
+   * @param args used as defined in options.
+   */
   public static void main(String[] args) {
-
-    var buildStrategy = new RandomMazeBuilder(10, 10, true, 0, 10);
-    GameWorld world = buildStrategy.buildWorld();
-    Set<Location<?>> visited = new HashSet<>();
-    visitAllNodes(world.getStartLocation(), visited, world.getEndLocation());
-
+    int exitCode = new CommandLine(new NonInteractivePlay()).execute(args);
+    System.exit(exitCode);
   }
 
-  private static void visitAllNodes(@NotNull Location<?> source, @NotNull Set<Location<?>> visited,
-                                    @Nullable Location<?> stopLocation) {
 
-    visited.add(source);
-    var adj = source.possibleActions().stream()
-            .filter(action -> action instanceof MoveAction).collect(Collectors.toList());
-    printLocationDetails(source);
-    if(source.equals(stopLocation)){
-      print("End location reached");
-      System.exit(0);
+  @CommandLine.Command(name = "noninteractive", mixinStandardHelpOptions = true,
+          description = "Automatically plays dungeon master from start to end.")
+  private static class NonInteractivePlay implements Callable<Integer> {
+
+    @CommandLine.Option(names = {"-mr", "--maxrow"}, defaultValue = "10",
+            description = "Maximum number of rows in the game.")
+    private int maxRows;
+
+    @CommandLine.Option(names = {"-mc", "--maxcolumns"}, defaultValue = "10",
+            description = "Maximum number of columns in the game.")
+    private int maxCols;
+
+    @CommandLine.Option(names = {"-w", "--iswrappeds"},
+            description = "Make the grid wrapped or not.")
+    private boolean isWrapped;
+
+    @CommandLine.Option(names = {"-dic", "--degIntConn"}, defaultValue = "0",
+            description = "Degree of inter-connectivity between the grid locations.")
+    private int degreeOfInterConnections;
+
+    @CommandLine.Option(names = {"-pt", "--perTreasure"}, defaultValue = "10",
+            description = "Percentage of caves with treasure.")
+    private int percentTreasure;
+    @CommandLine.Option(names = {"-nm", "--numberMonsters"}, defaultValue = "0",
+            description = "Number of monsters in the game.")
+    private int numberMonsters;
+
+    @Override
+    public Integer call() {
+      WorldBuildStrategy buildStrategy = new RandomMazeBuilder(maxRows, maxCols, isWrapped,
+              degreeOfInterConnections, percentTreasure, numberMonsters);
+      Game model = new DungeonGame(buildStrategy);
+      IView<String, String> view = new TextView(System.out, new InputStreamReader(System.in));
+      IController controller = new TextController(model, view);
+      controller.start();
+      return 0;
+
+
     }
-    for (Action<?> moveAction :
-            adj) {
-      Location<?> neighbor = (Location<?>) moveAction.act()
-              .orElseThrow(() -> new IllegalStateException("Neighbor not found"));
-      if (!visited.contains(neighbor)) {
 
-        visited.add(neighbor);
-        visitAllNodes(neighbor, visited, stopLocation);
-      }
-    }
   }
-
-  private static void printLocationDetails(@NotNull Location<?> location) {
-    printDiv();
-    print(String.format("Player is at %s", location.getLocationDescription()));
-    print("");
-    print("Player");
-    for (int i = 0; i < location.possibleActions().size(); i++) {
-      print(String.format("%d. %s", i + 1, location.possibleActions().get(i).describe()));
-    }
-    printDiv();
-  }
-
-  private static void print(String str) {
-    System.out.println(str);
-  }
-
-  private static void printDiv() {
-    System.out.println("=============================================");
-  }
-
 }
+
+

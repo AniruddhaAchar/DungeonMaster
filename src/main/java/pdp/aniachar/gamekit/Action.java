@@ -22,7 +22,7 @@ public interface Action<T> {
    *
    * @return {@link Optional} if there is a state change that needs to be communicated.
    */
-  Optional<T> act();
+  Optional<T> act() throws NoSuchMethodException;
 
   /**
    * Describes what the action does.
@@ -30,4 +30,13 @@ public interface Action<T> {
    * @return The description of the action.
    */
   String describe();
+
+  /**
+   * Links the way in which the location action will interact with the character.
+   *
+   * @param character The character who the location should interact with.
+   * @return If the action was successful or not.
+   */
+
+  Optional<Boolean> actOn(Character character) throws NoSuchMethodException;
 }

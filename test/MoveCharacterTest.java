@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import pdp.aniachar.dungeonmaster.action.character.MoveCharacter;
 import pdp.aniachar.dungeonmaster.gameworld.MazeLocation;
-import pdp.aniachar.dungeonmaster.player.PlayerBuilder;
+import pdp.aniachar.dungeonmaster.character.player.PlayerBuilder;
 import pdp.aniachar.gamekit.Character;
 import pdp.aniachar.gamekit.Location;
 
@@ -14,7 +14,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the behaviour of {@link MoveCharacter}
+ * Tests the behaviour of {@link MoveCharacter}.
+ * Tests if the functionalities work as defined.
  */
 
 

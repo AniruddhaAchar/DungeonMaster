@@ -16,7 +16,7 @@ import pdp.aniachar.gamekit.Location;
  * When this is called i.e. "acted upon", the new location to which to move is returned.
  */
 
-public class MoveAction implements LocationAction<Location<?>> {
+public class MoveAction implements IMoveAction {
   private final Location<?> whereTo;
   private final Direction direction;
 
@@ -74,5 +74,10 @@ public class MoveAction implements LocationAction<Location<?>> {
   public Optional<Boolean> actOn(Character character) {
     Boolean result = character.makeMove(whereTo);
     return Optional.of(result);
+  }
+
+  @Override
+  public Direction getDirection() {
+    return direction;
   }
 }

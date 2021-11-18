@@ -3,13 +3,15 @@ package pdp.aniachar.gamekit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+
 /**
  * This interface specifies a specific location in the game world.
  * This provides ways in which a {@link Character} can interact with the location.
  *
  * @param <T> The implementation detail of how the location is represented.
  */
-public interface Location<T> {
+
+public interface Location<T> extends ImmutableLocation<T> {
 
   /**
    * Gets a {@link List} of all {@link Item}s that are in the current location.
@@ -42,10 +44,5 @@ public interface Location<T> {
    */
   boolean removeItem(@NotNull Item itemToRemove);
 
-  /**
-   * Gets the description of the location.
-   *
-   * @return The description of the location.
-   */
-  T getLocationDescription();
+
 }

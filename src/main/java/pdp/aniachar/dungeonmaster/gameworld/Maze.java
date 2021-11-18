@@ -1,7 +1,9 @@
 package pdp.aniachar.dungeonmaster.gameworld;
 
+import java.util.List;
 import java.util.Set;
 
+import pdp.aniachar.dungeonmaster.character.monster.Otyughs;
 import pdp.aniachar.gamekit.GameWorld;
 import pdp.aniachar.gamekit.Location;
 
@@ -16,11 +18,12 @@ import pdp.aniachar.gamekit.Location;
 
 public class Maze implements GameWorld {
 
-  private final MazeLocation startLocation;
-  private final MazeLocation endLocation;
+  private final IMazeLocation startLocation;
+  private final IMazeLocation endLocation;
 
 
-  Maze(MazeLocation startLocation, MazeLocation endLocation, Set<MazeLocation> mazeLocations) {
+  Maze(IMazeLocation startLocation, IMazeLocation endLocation, Set<IMazeLocation> mazeLocations,
+       List<Otyughs> otyughs) {
     this.startLocation = startLocation;
     this.endLocation = endLocation;
   }

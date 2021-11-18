@@ -2,12 +2,18 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.junit.Test;
 
 import pdp.aniachar.dungeonmaster.gameworld.MazeLocation;
-import pdp.aniachar.dungeonmaster.player.PlayerBuilder;
+import pdp.aniachar.dungeonmaster.character.player.PlayerBuilder;
 import pdp.aniachar.gamekit.Character;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+/**
+ * Tests the functionalities of {@link PlayerBuilder}.
+ * Tests if the functionalities work as defined.
+ */
+
 public class PlayerBuilderTest {
 
   @Test
@@ -31,7 +37,7 @@ public class PlayerBuilderTest {
   }
 
   @Test
-  public void createPlayer() {
+  public void createPlayer() throws NoSuchMethodException {
     try {
       new PlayerBuilder(null);
       fail();
@@ -43,6 +49,6 @@ public class PlayerBuilderTest {
             .createPlayer();
     assertTrue(c.getName().contains("Player"));
     assertEquals(loc, c.getCurrentLocation());
-    assertEquals(0, c.getAllItems().size());
+    assertEquals(3, c.getAllItems().size());
   }
 }

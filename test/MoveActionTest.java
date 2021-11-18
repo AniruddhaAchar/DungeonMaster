@@ -8,6 +8,12 @@ import pdp.aniachar.gamekit.Direction;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+/**
+ * Tests the {@link pdp.aniachar.dungeonmaster.action.location.MoveAction}.
+ * Tests if the functionalities work as defined.
+ */
+
 public class MoveActionTest {
 
   @Test
@@ -19,7 +25,8 @@ public class MoveActionTest {
       assertTrue(e.getMessage().contains("null"));
     }
     try {
-      new MoveActionBuilder().setWhereTo(new MazeLocation(new MutablePair<>(1, 1))).setDirection(null).createMoveAction();
+      new MoveActionBuilder().setWhereTo(new MazeLocation(new MutablePair<>(1, 1)))
+              .setDirection(null).createMoveAction();
       fail();
     } catch (IllegalArgumentException e) {
       assertTrue(e.getMessage().contains("null"));
@@ -28,15 +35,17 @@ public class MoveActionTest {
 
   @Test
   public void act() {
-    var whereTo = new MazeLocation(new MutablePair<>(1,1));
-    var action = new MoveActionBuilder().setWhereTo(whereTo).setDirection(Direction.EAST).createMoveAction();
+    var whereTo = new MazeLocation(new MutablePair<>(1, 1));
+    var action = new MoveActionBuilder().setWhereTo(whereTo)
+            .setDirection(Direction.EAST).createMoveAction();
     assertEquals(whereTo, action.act().orElseThrow());
   }
 
   @Test
   public void describe() {
-    var whereTo = new MazeLocation(new MutablePair<>(1,1));
-    var action = new MoveActionBuilder().setWhereTo(whereTo).setDirection(Direction.EAST).createMoveAction();
+    var whereTo = new MazeLocation(new MutablePair<>(1, 1));
+    var action = new MoveActionBuilder().setWhereTo(whereTo).setDirection(Direction.EAST)
+            .createMoveAction();
     assertTrue(action.describe().contains("Can move"));
   }
 }

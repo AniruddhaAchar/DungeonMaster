@@ -12,11 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import pdp.aniachar.dungeonmaster.action.location.LocationAction;
 import pdp.aniachar.dungeonmaster.action.location.MoveAction;
 import pdp.aniachar.dungeonmaster.action.location.PickItemAction;
 import pdp.aniachar.dungeonmaster.action.location.PickItemActionBuilder;
 import pdp.aniachar.gamekit.Action;
 import pdp.aniachar.gamekit.Item;
+import pdp.aniachar.gamekit.ItemType;
 import pdp.aniachar.gamekit.Location;
 
 /**
@@ -27,13 +29,20 @@ import pdp.aniachar.gamekit.Location;
  * Once an item is picked, it is removed from the location.
  */
 
-public class MazeLocation implements Location<Pair<Integer, Integer>> {
+public class MazeLocation implements IMazeLocation {
 
   private final Pair<Integer, Integer> gridLocation;
-  private final List<Item> itemsAtLocation;
-  private final List<PickItemAction> pickupActions;
-  private final Set<MoveAction> moveActions;
-  private final Map<Item, PickItemAction> itemPickItemActionMap;
+  private List<Item> itemsAtLocation;
+  private List<PickItemAction> pickupActions;
+  private Set<MoveAction> moveActions;
+  private Map<Item, PickItemAction> itemPickItemActionMap;
+  private int smellStrength;
+
+  /**
+   * Constructs a 2D maze locations that is at the grid location provided.
+   *
+   * @param gridLocation The (X, Y) location on the grid.
+   */
 
   public MazeLocation(@NotNull Pair<Integer, Integer> gridLocation) {
     this.gridLocation = gridLocation;
@@ -41,6 +50,7 @@ public class MazeLocation implements Location<Pair<Integer, Integer>> {
     this.pickupActions = new ArrayList<>();
     this.moveActions = new HashSet<>();
     itemPickItemActionMap = new HashMap<>();
+    smellStrength = 0;
   }
 
   void addItem(Item item) {
@@ -63,12 +73,12 @@ public class MazeLocation implements Location<Pair<Integer, Integer>> {
 
   @Override
   public List<Action<?>> possibleActions() {
-    List<Action<?>> possibleActions = new ArrayList<>(pickupActions);
+    List<Action<?>> possibleActions = new ArrayList<>();
     if (moveActions.size() != 0) {
       possibleActions.addAll(new ArrayList<>(moveActions));
     }
     if (pickupActions.size() != 0) {
-      possibleActions.addAll(pickupActions);
+      possibleActions.addAll(new ArrayList<>(pickupActions));
     }
     return possibleActions;
   }
@@ -103,12 +113,17 @@ public class MazeLocation implements Location<Pair<Integer, Integer>> {
 
   @Override
   public Location<Pair<Integer, Integer>> copy() {
-    return new MazeLocation(this.gridLocation);
+    MazeLocation copyLocation = new MazeLocation(this.gridLocation);
+    copyLocation.itemPickItemActionMap = new HashMap<>(this.itemPickItemActionMap);
+    copyLocation.moveActions = new HashSet<>(this.moveActions);
+    copyLocation.pickupActions = new ArrayList<>(this.pickupActions);
+    copyLocation.itemsAtLocation = new ArrayList<>(this.itemsAtLocation);
+    return copyLocation;
   }
 
   @Override
   public boolean removeItem(@NotNull Item itemToRemove) {
-    var action = itemPickItemActionMap.get(itemToRemove);
+    LocationAction<Item> action = itemPickItemActionMap.get(itemToRemove);
     pickupActions.remove(action);
     itemPickItemActionMap.remove(itemToRemove);
     return itemsAtLocation.remove(itemToRemove);
@@ -119,7 +134,49 @@ public class MazeLocation implements Location<Pair<Integer, Integer>> {
     return gridLocation;
   }
 
-  List<MoveAction> getAllMoveActions() {
+  @Override
+  public void addSmell(SmellStrength smellStrength) {
+    if (smellStrength == SmellStrength.STRONG) {
+      this.smellStrength += 2;
+    } else if (smellStrength == SmellStrength.WEAK) {
+      this.smellStrength += 1;
+    }
+  }
+
+  @Override
+  public void removeSmell(SmellStrength smellStrength) {
+    if (smellStrength == SmellStrength.STRONG) {
+      this.smellStrength -= 2;
+    } else if (smellStrength == SmellStrength.WEAK) {
+      this.smellStrength -= 1;
+    }
+  }
+
+
+  @Override
+  public List<MoveAction> getMoveAction() {
     return new ArrayList<>(moveActions);
   }
+
+  @Override
+  public Map<ItemType, PickItemAction> getPickItemActions() {
+    Map<ItemType, PickItemAction> result = new HashMap<>();
+    for (var pickItem :
+            itemPickItemActionMap.entrySet()) {
+      Item item = pickItem.getKey();
+      result.put(item.getItemType(), pickItem.getValue());
+    }
+    return result;
+  }
+
+  @Override
+  public SmellStrength getSmellStrength() {
+    if (this.smellStrength >= 2) {
+      return SmellStrength.STRONG;
+    } else if (this.smellStrength == 1) {
+      return SmellStrength.WEAK;
+    }
+    return SmellStrength.NONE;
+  }
+
 }

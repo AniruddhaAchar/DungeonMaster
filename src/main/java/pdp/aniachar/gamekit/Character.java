@@ -14,10 +14,9 @@ import java.util.List;
  * Characters can pick up {@link Item}s that are in the {@link GameWorld}'s current location.
  * Characters also should have ability to provide a {@link List} of all the items that they
  * currently possess.
- *
  */
 
-public interface Character {
+public interface Character extends ImmutableCharacter {
   /**
    * Tries to move the character to the new position.
    *
@@ -25,13 +24,6 @@ public interface Character {
    * @return True if the player can be moved to the specified location, else false.
    */
   boolean makeMove(Location<?> whereTo);
-
-  /**
-   * Gets the current location that the character is in.
-   *
-   * @return The current {@link Location} the payer is in.
-   */
-  Location<?> getCurrentLocation();
 
   /**
    * Tries to take an item.
@@ -42,21 +34,24 @@ public interface Character {
    * @return True if the assignment was a success, else false.
    */
 
-  boolean takeItem(@NotNull Item item);
+  boolean takeItem(@NotNull Item item) throws NoSuchMethodException;
+
 
   /**
-   * Gets the {@link List} of all items that a Character possesses.
+   * Gets the current health of the character.
    *
-   * @return A {@link List} of all items possessed by the player.
+   * @return The current health of the character.
    */
-  List<Item> getAllItems();
+
+  double getCurrentHealth();
+
 
   /**
-   * Gets the name of the character.
-   * This should not be used as a unique identifier.
-   * Unique identifiers should be implemented in the classes that implement the Character.
+   * Changes the health of a character by the {@code changeBy} value.
+   * Health of a character may be increased or decreased here.
    *
-   * @return {@link String} name of the character.
+   * @param changeBy The value by which the health of the character is to be changed.
    */
-  String getName();
+
+  void changeHealth(double changeBy);
 }

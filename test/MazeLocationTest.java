@@ -19,6 +19,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * Tests the behaviour of {@link MazeLocation}.
+ * Tests if the functionalities work as defined.
+ */
+
 public class MazeLocationTest {
   Location<?> location;
   List<Item> items;
@@ -28,16 +33,16 @@ public class MazeLocationTest {
   @Before
   public void setup() {
     items = List.of(new Treasure(TreasureType.RUBY), new Treasure(TreasureType.DIAMOND),
-            new Treasure(TreasureType.SAFARI));
+            new Treasure(TreasureType.SAPPHIRE));
     location = new MazeLocation(new MutablePair<>(0, 0));
 
     try {
-      strategy = new RandomMazeBuilder(10, 10, false, 1, 100);
+      strategy = new RandomMazeBuilder(10, 10, false, 1, 100, 0);
     } catch (IllegalStateException e) {
       if (e.getMessage().contains("caves")) {
         //try to build the maze again.
         strategy = new RandomMazeBuilder(10, 10, false,
-                1, 100);
+                1, 100, 0);
       }
     }
     world = strategy.buildWorld();
@@ -67,7 +72,7 @@ public class MazeLocationTest {
   }
 
   @Test
-  public void testTakeAction() {
+  public void testTakeAction() throws NoSuchMethodException {
     Location<?> startLoc = world.getStartLocation();
     int originalNumItems = startLoc.getItems().size();
     int originalNumActions = startLoc.possibleActions().size();

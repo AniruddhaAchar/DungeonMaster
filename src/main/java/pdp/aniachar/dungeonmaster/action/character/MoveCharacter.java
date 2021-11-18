@@ -42,6 +42,11 @@ public class MoveCharacter implements Action<Boolean> {
   }
 
   @Override
+  public Optional<Boolean> actOn(Character character) throws NoSuchMethodException {
+    throw new NoSuchMethodException();
+  }
+
+  @Override
   public String toString() {
     return describe();
   }

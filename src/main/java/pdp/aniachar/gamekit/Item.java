@@ -24,4 +24,11 @@ public interface Item {
    * @return The name of the item.
    */
   String getName();
+
+  /**
+   * Gets the type of item this is.
+   *
+   * @return The type of item this is.
+   */
+  ItemType getItemType();
 }

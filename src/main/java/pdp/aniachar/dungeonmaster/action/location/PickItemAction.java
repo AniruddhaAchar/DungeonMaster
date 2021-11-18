@@ -49,7 +49,7 @@ public class PickItemAction implements LocationAction<Item> {
   }
 
   @Override
-  public Optional<Boolean> actOn(Character character) {
+  public Optional<Boolean> actOn(Character character) throws NoSuchMethodException {
     Item itemToAssign = act().orElse(null);
     if (itemToAssign == null) {
       return Optional.of(false);

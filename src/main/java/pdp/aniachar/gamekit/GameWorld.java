@@ -1,7 +1,5 @@
 package pdp.aniachar.gamekit;
 
-import java.util.List;
-
 /**
  * Provides the functionalities for the world in which a {@link Character} can play.
  * A GameWorld would have multiple locations that a player can visit.
@@ -19,7 +17,7 @@ public interface GameWorld {
    * @return The start {@link Location}.
    */
 
-  Location getStartLocation();
+  Location<?> getStartLocation();
 
   /**
    * Gets the end location of the world.
@@ -27,6 +25,6 @@ public interface GameWorld {
    * @return The end {@link Location} the world.
    */
 
-  Location getEndLocation();
+  Location<?> getEndLocation();
 
 }
