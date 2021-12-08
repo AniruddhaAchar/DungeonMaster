@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import pdp.aniachar.dungeonmaster.character.AbstractCharacter;
 import pdp.aniachar.dungeonmaster.character.player.IPlayer;
-import pdp.aniachar.dungeonmaster.character.player.Player;
 import pdp.aniachar.dungeonmaster.comm.ArrowHitEvent;
 import pdp.aniachar.dungeonmaster.comm.CallEvent;
 import pdp.aniachar.dungeonmaster.comm.DeathEvent;
@@ -42,17 +41,18 @@ public class Otyughs extends AbstractCharacter {
 
   /**
    * Creates an Otyughs at the specified location and with the given name.
+   *
    * @param currentLocation The location where the Otyughs will live.
-   * @param name The name of the Otyughs.
+   * @param name            The name of the Otyughs.
    */
 
   public Otyughs(@NotNull Location<?> currentLocation, @NotNull String name) {
+    super(100d);
     if (name.isBlank()) {
       throw new IllegalArgumentException("Name cannot be blank");
     }
     this.currentLocation = currentLocation;
     this.name = name;
-    this.health = 100d;
     EventContainer.getModelEventBus().register(this);
     setSmellPermeatedLocations();
     publishSmellChanges(true);
@@ -60,18 +60,19 @@ public class Otyughs extends AbstractCharacter {
 
   /**
    * Creates a copy Otyughs at the specified location and with the given name.
+   *
    * @param currentLocation The location where the Otyughs will live.
-   * @param name The name of the Otyughs.
-   * @param subEvents Because this is a copy, it should not subscribe to the event bus.
+   * @param name            The name of the Otyughs.
+   * @param subEvents       Because this is a copy, it should not subscribe to the event bus.
    */
 
   public Otyughs(@NotNull Location<?> currentLocation, @NotNull String name, boolean subEvents) {
+    super(100d);
     if (name.isBlank()) {
       throw new IllegalArgumentException("Name cannot be blank");
     }
     this.currentLocation = currentLocation;
     this.name = name;
-    this.health = 100d;
     setSmellPermeatedLocations();
     if (subEvents) {
       EventContainer.getModelEventBus().register(this);
@@ -93,9 +94,14 @@ public class Otyughs extends AbstractCharacter {
    */
   private void publishSmellChanges(boolean shouldAdd) {
 
-    for (var kv :
-            smellPermeatedLocations.entrySet()) {
-      SmellStrength smellStrength = kv.getValue() < 2 ? SmellStrength.STRONG : SmellStrength.WEAK;
+    for (var kv : smellPermeatedLocations.entrySet()) {
+      SmellStrength smellStrength;
+
+      if (kv.getValue() < 2) {
+        smellStrength = SmellStrength.STRONG;
+      } else {
+        smellStrength = SmellStrength.WEAK;
+      }
       if (shouldAdd) {
         ((IMazeLocation) kv.getKey()).addSmell(smellStrength);
       } else {
@@ -170,12 +176,13 @@ public class Otyughs extends AbstractCharacter {
 
   private void battlePlayer(IPlayer player) {
     if (health > 50) {
-      EventContainer.getModelEventBus().post(new PlayerDeathEvent((Player) player));
+      EventContainer.getModelEventBus().post(new PlayerDeathEvent(player));
     } else {
       int rand = new Random().nextInt(2);
       if (rand == 0) {
-        EventContainer.getModelEventBus().post(new PlayerDeathEvent((Player) player));
+        EventContainer.getModelEventBus().post(new PlayerDeathEvent(player));
       } else {
+        EventContainer.getModelEventBus().post(new DeathEvent<>(this));
         EventContainer.getModelEventBus().unregister(this);
         publishSmellChanges(false);
       }
@@ -194,4 +201,10 @@ public class Otyughs extends AbstractCharacter {
     EventContainer.getModelEventBus().post(new RoarEvent<>(this));
   }
 
+  @Override
+  protected void bringBackToLifeHelper() {
+    EventContainer.getModelEventBus().register(this);
+    publishSmellChanges(false);
+    publishSmellChanges(true);
+  }
 }

@@ -54,4 +54,10 @@ public interface Character extends ImmutableCharacter {
    */
 
   void changeHealth(double changeBy);
+
+  /**
+   * Brings the character back to life.
+   */
+
+  void bringBackToLife();
 }

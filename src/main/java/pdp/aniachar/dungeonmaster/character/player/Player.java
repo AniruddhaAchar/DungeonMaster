@@ -40,6 +40,7 @@ public class Player extends AbstractCharacter implements IPlayer {
 
   Player(@NotNull Location<?> startingLocation, @NotNull String name, List<Arrow> quiver,
          boolean register) {
+    super(1);
     if (name.isBlank()) {
       throw new IllegalArgumentException("Player cannot be blank");
     }
@@ -47,7 +48,6 @@ public class Player extends AbstractCharacter implements IPlayer {
     this.name = name;
     possessedItems = new ArrayList<>();
     this.quiver = new ArrayList<>(quiver);
-    health = 1;
     if (register) {
       EventContainer.getModelEventBus().register(this);
     }
@@ -151,5 +151,10 @@ public class Player extends AbstractCharacter implements IPlayer {
   @Override
   public void playerDeathListener(DeathEvent<Player> playerDeathEvent) {
     health = 0;
+  }
+
+  @Override
+  protected void bringBackToLifeHelper() {
+    EventContainer.getModelEventBus().register(this);
   }
 }
