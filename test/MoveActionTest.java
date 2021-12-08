@@ -19,14 +19,14 @@ public class MoveActionTest {
   @Test
   public void testCreation() {
     try {
-      new MoveActionBuilder().setWhereTo(null).setDirection(Direction.EAST).createMoveAction();
+      new MoveActionBuilder().setWhereTo(null).setDirection(Direction.EAST).build();
       fail();
     } catch (IllegalArgumentException e) {
       assertTrue(e.getMessage().contains("null"));
     }
     try {
       new MoveActionBuilder().setWhereTo(new MazeLocation(new MutablePair<>(1, 1)))
-              .setDirection(null).createMoveAction();
+              .setDirection(null).build();
       fail();
     } catch (IllegalArgumentException e) {
       assertTrue(e.getMessage().contains("null"));
@@ -37,7 +37,7 @@ public class MoveActionTest {
   public void act() {
     var whereTo = new MazeLocation(new MutablePair<>(1, 1));
     var action = new MoveActionBuilder().setWhereTo(whereTo)
-            .setDirection(Direction.EAST).createMoveAction();
+            .setDirection(Direction.EAST).build();
     assertEquals(whereTo, action.act().orElseThrow());
   }
 
@@ -45,7 +45,7 @@ public class MoveActionTest {
   public void describe() {
     var whereTo = new MazeLocation(new MutablePair<>(1, 1));
     var action = new MoveActionBuilder().setWhereTo(whereTo).setDirection(Direction.EAST)
-            .createMoveAction();
+            .build();
     assertTrue(action.describe().contains("Can move"));
   }
 }

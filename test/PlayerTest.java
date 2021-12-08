@@ -160,7 +160,7 @@ public class PlayerTest {
   }
 
   @Test
-  public void testArrows() throws NoSuchMethodException {
+  public void testArrows() {
     assertEquals(3, player2.getQuiver().size());
   }
 
@@ -191,9 +191,10 @@ public class PlayerTest {
         }
       }
       distMap.computeIfPresent(deathCount, (key, count) -> count = count + 1);
-      distMap.computeIfAbsent(deathCount, integer -> 1);
+      distMap.putIfAbsent(deathCount, 1);
     }
     assertTrue(distMap.size() > 0);
+    assertTrue(Math.abs(distMap.get(0) - 100 * 30 / 2) < 100);
   }
 
   @Test

@@ -47,7 +47,7 @@ public class ShootArrowActionTest {
   }
 
   @Test
-  public void moveNorth() {
+  public void shootNorth() {
     IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(0), locations.get(1)), 6, 6);
     IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(0), locations.get(6)), 6, 6);
     IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(1), locations.get(2)), 6, 6);
@@ -59,6 +59,21 @@ public class ShootArrowActionTest {
     ShootArrowAction action = new ShootArrowActionBuilder().withArrow(arrow)
             .withDirection(Direction.NORTH).withDistance(2).build();
     assertTrue(action.act().orElseThrow());
+  }
+
+  @Test
+  public void shootSouth() {
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(0), locations.get(1)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(0), locations.get(6)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(1), locations.get(2)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(2), locations.get(3)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(2), locations.get(8)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(3), locations.get(4)), 6, 6);
+    IMazeLocationBuilder.makeAdjacent(new MutablePair<>(locations.get(3), locations.get(9)), 6, 6);
+
+    ShootArrowAction action = new ShootArrowActionBuilder().withArrow(arrow)
+            .withDirection(Direction.SOUTH).withDistance(2).build();
+    assertFalse(action.act().orElseThrow());
   }
 
   @Test

@@ -1,27 +1,18 @@
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import pdp.aniachar.controller.CommandLineParser;
+import pdp.aniachar.controller.Controller;
 import pdp.aniachar.controller.IController;
-import pdp.aniachar.controller.TextController;
 import pdp.aniachar.dungeonmaster.DungeonGame;
-import pdp.aniachar.dungeonmaster.character.monster.Otyughs;
 import pdp.aniachar.dungeonmaster.gameworld.IMazeLocation;
-import pdp.aniachar.dungeonmaster.gameworld.IMazeLocationBuilder;
-import pdp.aniachar.dungeonmaster.gameworld.MazeLocation;
-import pdp.aniachar.dungeonmaster.item.Arrow;
-import pdp.aniachar.dungeonmaster.item.Treasure;
-import pdp.aniachar.dungeonmaster.item.TreasureType;
 import pdp.aniachar.gamekit.Game;
-import pdp.aniachar.gamekit.GameWorld;
-import pdp.aniachar.gamekit.Location;
-import pdp.aniachar.gamekit.WorldBuildStrategy;
-import pdp.aniachar.view.IView;
 import pdp.aniachar.view.TextView;
 
 import static org.junit.Assert.assertTrue;
@@ -30,12 +21,12 @@ import static org.junit.Assert.assertTrue;
  * Tests the Controller's behaviour.
  */
 
-public class TextControllerTest {
+public class ControllerTest {
 
   List<IMazeLocation> locations = new ArrayList<>();
   private IController controller;
   private Game model;
-  private IView<String, String> view;
+  private TextView view;
   private StringBuilder viewLogger;
   private Readable in;
 
@@ -50,8 +41,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidInput() {
     in = new StringReader("asdasd");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -64,8 +55,8 @@ public class TextControllerTest {
   @Test
   public void testHelpInput() {
     in = new StringReader("help");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -105,8 +96,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidDirectionInput() {
     in = new StringReader("move asas");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -119,8 +110,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidMoveButValidDirectionInput() {
     in = new StringReader("asdas north");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -133,8 +124,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidCommandsInput() {
     in = new StringReader("asdas asas\nasdasdas asdasd\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -148,8 +139,8 @@ public class TextControllerTest {
   @Test
   public void testValidMoveButNotPossibleInput() {
     in = new StringReader("move north");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -162,8 +153,8 @@ public class TextControllerTest {
   @Test
   public void testValidMoveButNotPossibleAliasInput() {
     in = new StringReader("m n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -176,8 +167,8 @@ public class TextControllerTest {
   @Test
   public void testValidMoveButNotPossibleAliasVerbInput() {
     in = new StringReader("m north");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -190,8 +181,8 @@ public class TextControllerTest {
   @Test
   public void testValidMoveButNotPossibleAliasNounInput() {
     in = new StringReader("move n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -204,8 +195,8 @@ public class TextControllerTest {
   @Test
   public void testValidMoveAndCanMoveInput() {
     in = new StringReader("move n\nmove east\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -213,14 +204,61 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+  }
+
+  @Test
+  public void testValidButNotPossiblePickInput() {
+    in = new StringReader("move n\nmove east\npick arrow\npick treasure\n");
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
+    try {
+      controller.start();
+    } catch (NoSuchElementException e) {
+      //expected exception. Do nothing.
+    }
+    assertTrue(viewLogger.toString().contains("bran"));
+    assertTrue(viewLogger.toString().contains("Cannot move"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("No such items present."));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testFailingAppendable() {
+    in = new StringReader("move n\nmove east\npick arrow\npick treasure\n");
+    view = new TextView(new Appendable() {
+      @Override
+      public Appendable append(CharSequence csq) throws IOException {
+        throw new IOException();
+      }
+
+      @Override
+      public Appendable append(CharSequence csq, int start, int end) throws IOException {
+        throw new IOException();
+      }
+
+      @Override
+      public Appendable append(char c) throws IOException {
+        throw new IOException();
+      }
+    }, in, new CommandLineParser());
+    controller = new Controller(model, view);
+    try {
+      controller.start();
+    } catch (NoSuchElementException e) {
+      //expected exception. Do nothing.
+    }
+    assertTrue(viewLogger.toString().contains("bran"));
+    assertTrue(viewLogger.toString().contains("Cannot move"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("No such items present."));
   }
 
   @Test
   public void testPickArrowItemInput() {
     in = new StringReader("move n\nmove east\npick arrow\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -228,15 +266,15 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
     assertTrue(viewLogger.toString().contains("3 arrow"));
   }
 
   @Test
   public void testInvalidActionItemInput() {
     in = new StringReader("move n\nmove east\npick arrow\npick arrow\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -244,7 +282,7 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
     assertTrue(viewLogger.toString().contains("4 arrow"));
     assertTrue(viewLogger.toString().contains("No such items present"));
   }
@@ -252,8 +290,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidPickItemInput() {
     in = new StringReader("move n\nmove east\npick arrow\npick t\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -261,7 +299,7 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
     assertTrue(viewLogger.toString().contains("4 arrow"));
     assertTrue(viewLogger.toString().contains("No such items present"));
   }
@@ -269,8 +307,8 @@ public class TextControllerTest {
   @Test
   public void testShootArrowInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot west 1\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -278,18 +316,18 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
-    assertTrue(viewLogger.toString().contains("4 arrow"));
-    assertTrue(viewLogger.toString().contains("Monster hit at at:"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("3 - ARROW"));
+    assertTrue(viewLogger.toString().contains("4 - ARROW"));
+    assertTrue(viewLogger.toString().contains("Otyughs hit"));
     assertTrue(viewLogger.toString().contains("weak smell"));
   }
 
   @Test
   public void testInvalidDirectionShootArrowInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot asdasd 1\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -297,8 +335,8 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("4 arrow"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("4 - ARROW"));
     assertTrue(viewLogger.toString().contains("Not a valid direction"));
     assertTrue(viewLogger.toString().contains("weak smell"));
   }
@@ -317,8 +355,8 @@ public class TextControllerTest {
             .append("shoot west 1\n")
             .append("shoot west 1\n")
             .toString());
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -326,12 +364,11 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("4 arrow"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
-    assertTrue(viewLogger.toString().contains("2 arrow"));
-    assertTrue(viewLogger.toString().contains("1 arrow"));
-    assertTrue(viewLogger.toString().contains("0 arrow"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("4 - ARROW"));
+    assertTrue(viewLogger.toString().contains("3 - ARROW"));
+    assertTrue(viewLogger.toString().contains("2 - ARROW"));
+    assertTrue(viewLogger.toString().contains("1 - ARROW"));
     assertTrue(viewLogger.toString().contains("Player has no more arrows."));
     assertTrue(viewLogger.toString().contains("weak smell"));
   }
@@ -339,8 +376,8 @@ public class TextControllerTest {
   @Test
   public void testInvalidDistanceShootArrowInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot north asdas\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -348,7 +385,7 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
     assertTrue(viewLogger.toString()
             .contains("Not a valid shoot distance. Distance must be integer"));
     assertTrue(viewLogger.toString().contains("weak smell"));
@@ -357,8 +394,8 @@ public class TextControllerTest {
   @Test
   public void testNegativeDistanceShootArrowInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot north -1\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -366,7 +403,7 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
     assertTrue(viewLogger.toString()
             .contains("Distance cannot be zero or negative or greater than 5"));
     assertTrue(viewLogger.toString().contains("weak smell"));
@@ -375,8 +412,8 @@ public class TextControllerTest {
   @Test
   public void testLargeDistanceShootArrowInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot north 5000\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -384,8 +421,8 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("3 - ARROW"));
     assertTrue(viewLogger.toString()
             .contains("Distance cannot be zero or negative or greater than 5"));
     assertTrue(viewLogger.toString().contains("weak smell"));
@@ -394,8 +431,8 @@ public class TextControllerTest {
   @Test
   public void testStrongSmellInput() {
     in = new StringReader("move n\nmove east\npick arrow\nmove south\nshoot west 1\nmove west\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -403,10 +440,10 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("4 arrow"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
-    assertTrue(viewLogger.toString().contains("Monster hit at at:"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("4 - ARROW"));
+    assertTrue(viewLogger.toString().contains("3 - ARROW"));
+    assertTrue(viewLogger.toString().contains("Otyughs hit"));
     assertTrue(viewLogger.toString().contains("weak smell"));
     assertTrue(viewLogger.toString().contains("strong smell"));
   }
@@ -416,8 +453,8 @@ public class TextControllerTest {
   public void testShootArrowAndKillInput() {
     in = new StringReader(
             "move n\nmove east\npick arrow\nmove south\nshoot west 1\nshoot west 1\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -425,12 +462,11 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
-    assertTrue(viewLogger.toString().contains("2 arrow"));
-    assertTrue(viewLogger.toString().contains("4 arrow"));
-    assertTrue(viewLogger.toString().contains("Monster hit at at:"));
-    assertTrue(viewLogger.toString().contains("Monster killed at at:"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("3 - ARROW"));
+    assertTrue(viewLogger.toString().contains("2 - ARROW"));
+    assertTrue(viewLogger.toString().contains("Otyughs hit"));
+    assertTrue(viewLogger.toString().contains("Monster killed"));
 
   }
 
@@ -438,8 +474,8 @@ public class TextControllerTest {
   public void testPickTreasureInput() {
     in = new StringReader(
             "move n\nmove east\npick arrow\nmove south\nmove east\npick treasure\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -447,9 +483,9 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,2)"));
-    assertTrue(viewLogger.toString().contains("1 treasure"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("(1,2)"));
+    assertTrue(viewLogger.toString().contains("1 - DIAMOND"));
   }
 
   @Test
@@ -460,10 +496,11 @@ public class TextControllerTest {
                     .append("pick arrow\n")
                     .append("move south\n")
                     .append("move west\n")
+                    .append("move south\n")
                     .append("move south")
                     .toString());
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -471,10 +508,10 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
     assertTrue(viewLogger.toString().contains("weak smell"));
     assertTrue(viewLogger.toString().contains("strong smell"));
-    assertTrue(viewLogger.toString().contains("Player died after entering a cave with a monster!"));
+    assertTrue(viewLogger.toString().contains("Player is dead"));
     assertTrue(model.isGameOver());
   }
 
@@ -483,8 +520,8 @@ public class TextControllerTest {
     in = new StringReader(
             "move n\nmove east\npick arrow\nmove south\nshoot west 1\nshoot west 1" +
                     "\nmove west\nmove south\n");
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -492,13 +529,13 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
-    assertTrue(viewLogger.toString().contains("2 arrow"));
-    assertTrue(viewLogger.toString().contains("Monster hit at at:"));
-    assertTrue(viewLogger.toString().contains("Monster killed at at:"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (1,0)"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (2,0)"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("2 - ARROW"));
+    assertTrue(viewLogger.toString().contains("hit"));
+    assertTrue(viewLogger.toString().contains("Monster killed"));
+    assertTrue(viewLogger.toString().contains("(1,1)"));
+    assertTrue(viewLogger.toString().contains("(1,0)"));
+    assertTrue(viewLogger.toString().contains("(2,0)"));
   }
 
   @Test
@@ -515,8 +552,8 @@ public class TextControllerTest {
                     .append("shoot east 1\n")
                     .append("shoot east 1\n")
                     .toString());
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -550,8 +587,8 @@ public class TextControllerTest {
                     .append("move east\n")
                     .append("move east\n")
                     .toString());
-    view = new TextView(viewLogger, in);
-    controller = new TextController(model, view);
+    view = new TextView(viewLogger, in, new CommandLineParser());
+    controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -559,8 +596,8 @@ public class TextControllerTest {
     }
     assertTrue(viewLogger.toString().contains("bran"));
     assertTrue(viewLogger.toString().contains("Cannot move"));
-    assertTrue(viewLogger.toString().contains("Player bran is at Location (0,1)"));
-    assertTrue(viewLogger.toString().contains("3 arrow"));
+    assertTrue(viewLogger.toString().contains("(0,1)"));
+    assertTrue(viewLogger.toString().contains("3 ARROW"));
     assertTrue(viewLogger.toString().contains("Monster hit at at: Location (2,0)"));
     assertTrue(viewLogger.toString().contains("Monster killed at at: Location (2,0)"));
     assertTrue(viewLogger.toString().contains("Player bran is at Location (1,1)"));
@@ -575,68 +612,4 @@ public class TextControllerTest {
   }
 
 
-
-  private class FakeWorldBuilder implements WorldBuildStrategy {
-    Otyughs otyughsAtSix;
-    Otyughs otyughsAtEnd;
-
-    FakeWorldBuilder() {
-      buildMaze();
-      otyughsAtEnd = new Otyughs(locations.get(8), "ender");
-      otyughsAtSix = new Otyughs(locations.get(6), "sixer");
-    }
-
-    private void buildMaze() {
-      for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-          if (i == 1 && j == 2) {
-            locations.add(new IMazeLocationBuilder(new MutablePair<>(i, j))
-                    .addTreasure(new Treasure(TreasureType.DIAMOND)).build());
-          } else if (i == 0 && j == 1) {
-            locations.add(new IMazeLocationBuilder(new MutablePair<>(i, j))
-                    .addArrow(new Arrow()).build());
-          } else {
-            locations.add(new MazeLocation(new MutablePair<>(i, j)));
-          }
-        }
-      }
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(0), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(2), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(4), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(2), locations.get(5)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(3), locations.get(4)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(6), locations.get(7)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(7), locations.get(8)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(3), locations.get(6)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(4), locations.get(5)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(6), locations.get(8)), 3, 3);
-
-    }
-
-
-    @Override
-    public GameWorld buildWorld() {
-      return new GameWorld() {
-        @Override
-        public Location<?> getStartLocation() {
-          return locations.get(0);
-        }
-
-        @Override
-        public Location<?> getEndLocation() {
-          return locations.get(8);
-        }
-      };
-    }
-  }
 }
