@@ -83,12 +83,12 @@ public class IMazeLocationBuilder {
     MazeLocation left = (MazeLocation) mazeLocationPair.getLeft();
     left.addMoveAction(new MoveActionBuilder()
             .setWhereTo(mazeLocationPair.getRight())
-            .setDirection(moveDirection.getRight()).createMoveAction());
+            .setDirection(moveDirection.getRight()).build());
     MazeLocation right = (MazeLocation) mazeLocationPair.getRight();
     right.addMoveAction(new MoveActionBuilder()
             .setWhereTo(mazeLocationPair.getLeft())
             .setDirection(moveDirection.getLeft())
-            .createMoveAction());
+            .build());
   }
 
   /**
