@@ -1,6 +1,6 @@
 package pdp.aniachar.dungeonmaster.comm;
 
-import pdp.aniachar.dungeonmaster.character.player.Player;
+import pdp.aniachar.gamekit.ImmutableCharacter;
 
 /**
  * An event that is emitted when a player dies.
@@ -8,14 +8,14 @@ import pdp.aniachar.dungeonmaster.character.player.Player;
  */
 
 public class PlayerDeathEvent {
-  private final Player player;
+  private final ImmutableCharacter player;
 
   /**
    * Creates the tomb stone event.
    *
    * @param player The player who was dies.
    */
-  public PlayerDeathEvent(Player player) {
+  public PlayerDeathEvent(ImmutableCharacter player) {
     this.player = player;
   }
 
@@ -24,7 +24,7 @@ public class PlayerDeathEvent {
    *
    * @return The player was died.
    */
-  public Player getPlayer() {
+  public ImmutableCharacter getPlayer() {
     return player;
   }
 }
