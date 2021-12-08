@@ -44,7 +44,7 @@ public class PickItemActionBuilder implements ActionBuilder<Item> {
    *
    * @return The created {@link PickItemAction}
    */
-  public Action<?> createPickItemAction() {
+  public PickItemAction createPickItemAction() {
     return new PickItemAction(actionLocation, itemToPick);
   }
 

@@ -42,7 +42,7 @@ public class MoveActionBuilder {
    *
    * @return A {@link MoveAction}
    */
-  public MoveAction createMoveAction() {
+  public MoveAction build() {
     return new MoveAction(whereTo, direction);
   }
 }
