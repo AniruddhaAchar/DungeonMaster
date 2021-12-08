@@ -11,6 +11,7 @@ import com.google.common.eventbus.EventBus;
 
 public class Communication {
   private static EventBus controllerModelBus;
+  private static EventBus controllerViewBus;
 
   /**
    * Gets the Event bus for communication between the Controller and Model.
@@ -19,10 +20,33 @@ public class Communication {
    * @return The event bus for communication between the model and controller.
    */
 
-  public static EventBus getControllerModelBus() {
+  public static EventBus getModelControllerBus() {
     if (controllerModelBus == null) {
       controllerModelBus = new EventBus();
     }
     return controllerModelBus;
+  }
+
+  /**
+   * Gets the Event bus for communication between the Controller and Model.
+   * This is a singleton that is returned.
+   *
+   * @return The event bus for communication between the model and controller.
+   */
+
+  public static EventBus getViewControllerBus() {
+    if (controllerViewBus == null) {
+      controllerViewBus = new EventBus();
+    }
+    return controllerViewBus;
+  }
+
+  /**
+   * Restarts all the event buses.
+   */
+
+  public static void reset() {
+    controllerViewBus = null;
+    controllerModelBus = null;
   }
 }
