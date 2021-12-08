@@ -17,6 +17,7 @@ import pdp.aniachar.dungeonmaster.character.monster.Otyughs;
 import pdp.aniachar.dungeonmaster.character.player.PlayerBuilder;
 import pdp.aniachar.dungeonmaster.comm.DeathEvent;
 import pdp.aniachar.dungeonmaster.comm.EventContainer;
+import pdp.aniachar.dungeonmaster.comm.GameOverEvent;
 import pdp.aniachar.dungeonmaster.comm.HitTakenEvent;
 import pdp.aniachar.dungeonmaster.comm.PlayerDeathEvent;
 import pdp.aniachar.dungeonmaster.comm.RoarEvent;
@@ -108,6 +109,7 @@ public class DungeonGame implements Game {
         Optional<?> result = playerAction.act();
         if (player.getCurrentLocation().equals(dungeon.getEndLocation())) {
           isGameOver = true;
+          emitGameOver(player.getCurrentHealth() > 0);
         }
         return result;
       } catch (NoSuchMethodException e) {
@@ -132,20 +134,20 @@ public class DungeonGame implements Game {
   public void playerDeathEventListener(PlayerDeathEvent playerDeathEvent) {
     this.isGameOver = true;
     player.changeHealth(-1d);
-    Communication.getControllerModelBus().post(playerDeathEvent);
+    Communication.getModelControllerBus().post(playerDeathEvent);
   }
 
   @Override
   @Subscribe
   public void monsterDeathEventListener(DeathEvent<Otyughs> otyughsDeathEvent) {
-    Communication.getControllerModelBus()
+    Communication.getModelControllerBus()
             .post(new DeathEvent<ImmutableCharacter>(otyughsDeathEvent.getPayload()));
   }
 
   @Override
   @Subscribe
   public void monsterHitListener(HitTakenEvent<ImmutableLocation<?>> hitEvent) {
-    Communication.getControllerModelBus().post(hitEvent);
+    Communication.getModelControllerBus().post(hitEvent);
   }
 
   /**
@@ -157,6 +159,21 @@ public class DungeonGame implements Game {
 
   @Subscribe
   public void monsterRoarListener(RoarEvent<Otyughs> roarEvent) {
-    Communication.getControllerModelBus().post(roarEvent);
+    Communication.getModelControllerBus().post(roarEvent);
+  }
+
+  @Override
+  public void restartGame() {
+    EventContainer.reset();
+    player.makeMove(dungeon.getStartLocation());
+    dungeon.restart();
+    player.bringBackToLife();
+    EventContainer.getModelEventBus().register(this);
+    isGameOver = false;
+  }
+
+  @Override
+  public void emitGameOver(boolean playerALive) {
+    Communication.getModelControllerBus().post(new GameOverEvent(playerALive));
   }
 }

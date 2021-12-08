@@ -27,4 +27,9 @@ public interface GameWorld {
 
   Location<?> getEndLocation();
 
+  /**
+   * Restarts the game.
+   */
+
+  void restart();
 }

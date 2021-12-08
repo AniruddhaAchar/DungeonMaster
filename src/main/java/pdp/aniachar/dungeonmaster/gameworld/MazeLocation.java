@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,8 @@ public class MazeLocation implements IMazeLocation {
   private Set<MoveAction> moveActions;
   private Map<Item, PickItemAction> itemPickItemActionMap;
   private int smellStrength;
+  private final List<Item> resetCopyItemsAtLocation;
+
 
   /**
    * Constructs a 2D maze locations that is at the grid location provided.
@@ -50,12 +53,19 @@ public class MazeLocation implements IMazeLocation {
     this.pickupActions = new ArrayList<>();
     this.moveActions = new HashSet<>();
     itemPickItemActionMap = new HashMap<>();
+    resetCopyItemsAtLocation = new LinkedList<>();
     smellStrength = 0;
   }
 
   void addItem(Item item) {
+
+    resetCopyItemsAtLocation.add(item);
+    buildLocationWithItem(item);
+  }
+
+  private void buildLocationWithItem(Item item) {
     itemsAtLocation.add(item);
-    PickItemAction pickupAction = (PickItemAction) new PickItemActionBuilder()
+    PickItemAction pickupAction = new PickItemActionBuilder()
             .setActionLocation(this).setItemToPick(item).createPickItemAction();
     pickupActions.add(pickupAction);
     itemPickItemActionMap.put(item, pickupAction);
@@ -127,6 +137,13 @@ public class MazeLocation implements IMazeLocation {
     pickupActions.remove(action);
     itemPickItemActionMap.remove(itemToRemove);
     return itemsAtLocation.remove(itemToRemove);
+  }
+
+  @Override
+  public void restart() {
+    for (var item : resetCopyItemsAtLocation) {
+      buildLocationWithItem(item);
+    }
   }
 
   @Override

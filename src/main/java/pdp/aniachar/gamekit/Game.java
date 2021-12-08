@@ -108,4 +108,18 @@ public interface Game {
    * @param roarEvent The roaring of the monster.
    */
   void monsterRoarListener(RoarEvent<Otyughs> roarEvent);
+
+
+  /**
+   * Restarts the game.
+   */
+
+  void restartGame();
+
+  /**
+   * Emits a game over event.
+   *
+   */
+
+  void emitGameOver(boolean playerALive);
 }

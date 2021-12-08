@@ -2,7 +2,7 @@ import com.google.common.eventbus.Subscribe;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,22 +17,20 @@ import pdp.aniachar.dungeonmaster.action.location.MoveAction;
 import pdp.aniachar.dungeonmaster.action.location.PickItemAction;
 import pdp.aniachar.dungeonmaster.character.monster.Otyughs;
 import pdp.aniachar.dungeonmaster.character.player.IPlayer;
+import pdp.aniachar.dungeonmaster.comm.CallEvent;
 import pdp.aniachar.dungeonmaster.comm.DeathEvent;
+import pdp.aniachar.dungeonmaster.comm.EventContainer;
 import pdp.aniachar.dungeonmaster.comm.HitTakenEvent;
+import pdp.aniachar.dungeonmaster.comm.RoarEvent;
 import pdp.aniachar.dungeonmaster.gameworld.IMazeLocation;
-import pdp.aniachar.dungeonmaster.gameworld.IMazeLocationBuilder;
-import pdp.aniachar.dungeonmaster.gameworld.MazeLocation;
 import pdp.aniachar.dungeonmaster.gameworld.SmellStrength;
 import pdp.aniachar.dungeonmaster.item.Arrow;
 import pdp.aniachar.dungeonmaster.item.ShootArrowActionBuilder;
-import pdp.aniachar.dungeonmaster.item.Treasure;
-import pdp.aniachar.dungeonmaster.item.TreasureType;
 import pdp.aniachar.gamekit.Action;
 import pdp.aniachar.gamekit.Direction;
 import pdp.aniachar.gamekit.Game;
-import pdp.aniachar.gamekit.GameWorld;
+import pdp.aniachar.gamekit.ImmutableCharacter;
 import pdp.aniachar.gamekit.ItemType;
-import pdp.aniachar.gamekit.Location;
 import pdp.aniachar.gamekit.PlayerActionType;
 import pdp.aniachar.gamekit.WorldBuildStrategy;
 
@@ -50,10 +48,15 @@ public class DungeonGameTest {
   List<IMazeLocation> locations = new ArrayList<>();
   MutableInt hitCount = new MutableInt(0);
   MutableBoolean deathNotice = new MutableBoolean(false);
+  List<ImmutableCharacter> monsters;
+  MutableInt monsterCount;
 
   @Before
   public void setup() {
-    Communication.getControllerModelBus().register(this);
+    Communication.getModelControllerBus().register(this);
+    EventContainer.getModelEventBus().register(this);
+    monsters = new ArrayList<>();
+    monsterCount = new MutableInt(0);
   }
 
   @Test
@@ -277,7 +280,7 @@ public class DungeonGameTest {
   }
 
   @Test
-  public void testKillingMonster() throws NoSuchMethodException {
+  public void testKillingMonster() {
     Game game = new DungeonGame(new FakeWorldBuilder());
     moveTo10(game);
     ShootArrowActionBuilder nextMoveBuilder = game.getAllPlayerAction()
@@ -383,33 +386,50 @@ public class DungeonGameTest {
     assertEquals(1d, game.getActivePlayer().getCurrentHealth(), 0);
   }
 
+
+  @Test
+  public void testRestart() throws NoSuchMethodException {
+    WorldBuildStrategy builder = new FakeWorldBuilder();
+    Game game = new DungeonGame(builder);
+    moveTo21(game);
+    game.restartGame();
+    assertEquals(game.getActivePlayer().getCurrentLocation(),
+            builder.buildWorld().getStartLocation());
+    EventContainer.getModelEventBus()
+            .post(
+                    new CallEvent<>(
+                            new Otyughs(builder.buildWorld().getStartLocation(), "foo", false)));
+    assertEquals(new MutableInt(2), monsterCount);
+  }
+
+  //region moves
   private void moveTo01(Game game) {
     List<Action<?>> possibleActions = game.getPossibleActions();
     game.interact(possibleActions.get(0));
   }
 
-  private void moveTo02(Game game) throws NoSuchMethodException {
+  private void moveTo02(Game game) {
     moveTo01(game);
     MoveAction nextMove = game.getAllMoveActions().get(Direction.EAST);
     game.interact(nextMove);
   }
 
-  private void moveTo12(Game game) throws NoSuchMethodException {
+  private void moveTo12(Game game) {
     moveTo02(game);
     game.interact(game.getAllMoveActions().get(Direction.SOUTH));
   }
 
-  private void moveTo11(Game game) throws NoSuchMethodException {
+  private void moveTo11(Game game) {
     moveTo12(game);
     game.interact(game.getAllMoveActions().get(Direction.WEST));
   }
 
-  private void moveTo10(Game game) throws NoSuchMethodException {
+  private void moveTo10(Game game) {
     moveTo11(game);
     game.interact(game.getAllMoveActions().get(Direction.WEST));
   }
 
-  private void moveTo20(Game game) throws NoSuchMethodException {
+  private void moveTo20(Game game) {
     moveTo10(game);
     ShootArrowActionBuilder nextMoveBuilder = game.getAllPlayerAction()
             .get(PlayerActionType.SHOOT_ARROW);
@@ -420,15 +440,16 @@ public class DungeonGameTest {
     game.interact(game.getAllMoveActions().get(Direction.SOUTH));
   }
 
-  private void moveTo21(Game game) throws NoSuchMethodException {
+  private void moveTo21(Game game) {
     moveTo20(game);
     game.interact(game.getAllMoveActions().get(Direction.EAST));
   }
 
-  private void moveTo22(Game game) throws NoSuchMethodException {
+  private void moveTo22(Game game) {
     moveTo21(game);
     game.interact(game.getAllMoveActions().get(Direction.EAST));
   }
+  //endregion
 
   private boolean testAllActionsHelper(Game game, int expectedAllActionSize,
                                        int expectedAllMoveActionSize,
@@ -460,6 +481,7 @@ public class DungeonGameTest {
     return hasAllExpectedActions.size() == expectedAllActionSize;
   }
 
+
   @Subscribe
   public void getHitNotification(HitTakenEvent<?> hitTakenEvent) {
     hitCount.increment();
@@ -470,68 +492,11 @@ public class DungeonGameTest {
     deathNotice.setValue(true);
   }
 
-  private class FakeWorldBuilder implements WorldBuildStrategy {
-    Otyughs otyughsAtSix;
-    Otyughs otyughsAtEnd;
-
-    FakeWorldBuilder() {
-      buildMaze();
-      otyughsAtEnd = new Otyughs(locations.get(8), "ender");
-      otyughsAtSix = new Otyughs(locations.get(6), "sixer");
-    }
-
-    private void buildMaze() {
-      for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-          if (i == 1 && j == 2) {
-            locations.add(new IMazeLocationBuilder(new MutablePair<>(i, j))
-                    .addTreasure(new Treasure(TreasureType.DIAMOND)).build());
-          } else if (i == 0 && j == 1) {
-            locations.add(new IMazeLocationBuilder(new MutablePair<>(i, j))
-                    .addArrow(new Arrow()).build());
-          } else {
-            locations.add(new MazeLocation(new MutablePair<>(i, j)));
-          }
-        }
-      }
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(0), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(2), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(4), locations.get(1)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(2), locations.get(5)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(3), locations.get(4)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(6), locations.get(7)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(7), locations.get(8)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(3), locations.get(6)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(4), locations.get(5)), 3, 3);
-      IMazeLocationBuilder.makeAdjacent(
-              new MutablePair<>(locations.get(6), locations.get(8)), 3, 3);
-
-    }
-
-
-    @Override
-    public GameWorld buildWorld() {
-      return new GameWorld() {
-        @Override
-        public Location<?> getStartLocation() {
-          return locations.get(0);
-        }
-
-        @Override
-        public Location<?> getEndLocation() {
-          return locations.get(8);
-        }
-      };
-    }
+  @Subscribe
+  public void countMonsters(@NotNull RoarEvent<Otyughs> roarEvent) {
+    Otyughs roarer = roarEvent.getRoarer();
+    monsterCount.increment();
   }
+
 
 }

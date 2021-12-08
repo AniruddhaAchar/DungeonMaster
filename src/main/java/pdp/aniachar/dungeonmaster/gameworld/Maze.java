@@ -20,12 +20,16 @@ public class Maze implements GameWorld {
 
   private final IMazeLocation startLocation;
   private final IMazeLocation endLocation;
+  private final List<Otyughs> otyughs;
+  private final Set<IMazeLocation> mazeLocations;
 
 
   Maze(IMazeLocation startLocation, IMazeLocation endLocation, Set<IMazeLocation> mazeLocations,
        List<Otyughs> otyughs) {
     this.startLocation = startLocation;
     this.endLocation = endLocation;
+    this.otyughs = otyughs;
+    this.mazeLocations = mazeLocations;
   }
 
   @Override
@@ -36,5 +40,15 @@ public class Maze implements GameWorld {
   @Override
   public Location<?> getEndLocation() {
     return endLocation;
+  }
+
+  @Override
+  public void restart() {
+    for (Otyughs monster : otyughs) {
+      monster.bringBackToLife();
+    }
+    for (IMazeLocation location : mazeLocations) {
+      location.restart();
+    }
   }
 }
