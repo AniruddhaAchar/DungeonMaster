@@ -1,11 +1,13 @@
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import pdp.aniachar.controller.TextController;
+import pdp.aniachar.controller.CommandLineParser;
+import pdp.aniachar.controller.Controller;
 import pdp.aniachar.dungeonmaster.DungeonGame;
 import pdp.aniachar.dungeonmaster.character.monster.Otyughs;
 import pdp.aniachar.dungeonmaster.gameworld.IMazeLocation;
@@ -27,8 +29,8 @@ import pdp.aniachar.view.TextView;
 
 public class Driver2 {
   private static Game model;
-  private static  Appendable viewLogger;
-  private static  Readable in;
+  private static Appendable viewLogger;
+  private static Readable in;
 
   /**
    * Entry point for the driver.
@@ -39,10 +41,9 @@ public class Driver2 {
     WorldBuildStrategy builder = new FakeWorldBuilder();
     model = new DungeonGame(builder, "Bran The wise");
     viewLogger = new StringBuilder();
-    in = winGameEnterEndCave();
-    IView<String, String> view = new TextView(viewLogger, in);
-    TextController controller = new TextController(model, view);
-    controller.setDebugHelper(true);
+    in = new InputStreamReader(System.in);
+    IView view = new TextView(System.out, in, new CommandLineParser());
+    Controller controller = new Controller(model, view);
     try {
       controller.start();
     } catch (NoSuchElementException e) {
@@ -153,6 +154,11 @@ public class Driver2 {
         @Override
         public Location<?> getEndLocation() {
           return locations.get(8);
+        }
+
+        @Override
+        public void restart() {
+          //Do nothing. This is a mocker.
         }
       };
     }

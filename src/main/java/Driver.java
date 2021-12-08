@@ -1,12 +1,18 @@
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
+import pdp.aniachar.controller.CommandLineParser;
+import pdp.aniachar.controller.Controller;
 import pdp.aniachar.controller.IController;
-import pdp.aniachar.controller.TextController;
 import pdp.aniachar.dungeonmaster.DungeonGame;
 import pdp.aniachar.dungeonmaster.gameworld.RandomMazeBuilder;
 import pdp.aniachar.gamekit.Game;
 import pdp.aniachar.gamekit.WorldBuildStrategy;
+import pdp.aniachar.view.GraphicUserInterface.SwingView;
 import pdp.aniachar.view.IView;
 import pdp.aniachar.view.TextView;
 import picocli.CommandLine;
@@ -23,7 +29,6 @@ public class Driver {
    */
   public static void main(String[] args) {
     int exitCode = new CommandLine(new NonInteractivePlay()).execute(args);
-    System.exit(exitCode);
   }
 
 
@@ -54,19 +59,40 @@ public class Driver {
             description = "Number of monsters in the game.")
     private int numberMonsters;
 
+    @CommandLine.Option(names = {"-cli"},
+            description = "Runs the CLI implementation of the game.")
+    private boolean isCli;
+
+    @CommandLine.Option(names = {"-debug"},
+            description = "Debug mode.")
+    private boolean debug;
+
     @Override
     public Integer call() {
+      if (!debug) {
+        try {
+          File logfile = File.createTempFile("DungeonMaster-", ".log");
+          FileHandler fileHandler = new FileHandler(logfile.getAbsolutePath());
+          Logger.getLogger("").addHandler(fileHandler);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+
       WorldBuildStrategy buildStrategy = new RandomMazeBuilder(maxRows, maxCols, isWrapped,
               degreeOfInterConnections, percentTreasure, numberMonsters);
       Game model = new DungeonGame(buildStrategy);
-      IView<String, String> view = new TextView(System.out, new InputStreamReader(System.in));
-      IController controller = new TextController(model, view);
+      IView view;
+      if (isCli) {
+        view = new TextView(System.out, new InputStreamReader(System.in),
+                new CommandLineParser());
+      } else {
+        view = new SwingView(maxRows, maxCols);
+      }
+      IController controller = new Controller(model, view);
       controller.start();
       return 0;
-
-
     }
-
   }
 }
 
