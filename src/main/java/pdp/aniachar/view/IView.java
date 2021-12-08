@@ -1,24 +1,71 @@
 package pdp.aniachar.view;
 
+import org.jetbrains.annotations.NotNull;
+
+import pdp.aniachar.view.ViewModel.IErrorViewModel;
+import pdp.aniachar.view.ViewModel.IEvent;
+import pdp.aniachar.view.ViewModel.ILocationViewModel;
+import pdp.aniachar.view.ViewModel.IPlayerViewModel;
+import pdp.aniachar.view.ViewModel.IQuit;
 /**
  * Represents a view that the controller can interact with.
- *
- * @param <T> The type of data that the view will return after consuming the user input.
- * @param <R> The type of data that the view will consume to render the view.
  */
 
-public interface IView<T, R> {
-  /**
-   * Gets the user input.
-   *
-   * @return The input that the user provided.
-   */
-  T getUserInput();
+public interface IView {
 
   /**
-   * Renders the view model.
+   * Renders the player view model to the screen.
+   * Update player description, inventory.
+   * Rendering is done through events and the view should subscribe to this event.
    *
-   * @param viewModel The view model that needs to be rendered.
+   * @param playerViewModel The view model to be rendered.
    */
-  void renderView(IViewModel<R> viewModel);
+  void renderPlayerViewModelListener(@NotNull IPlayerViewModel playerViewModel);
+
+  /**
+   * Renders the location details that the player is currently in.
+   * Update player's current location details.
+   *
+   * @param locationViewModel The location details that needs to be rendered.
+   */
+  void renderLocationViewModelListener(@NotNull ILocationViewModel locationViewModel);
+
+  /**
+   * Renders an asynchronous that occurred during the turn.
+   * Triggered when there is an event in any location.
+   *
+   * @param eventDescription The event to be rendered.
+   */
+
+  void renderEventDescriptionListener(@NotNull IEvent eventDescription);
+
+
+  /**
+   * Renders an error that may have occurred when playing the game.
+   *
+   * @param errorViewModel The error that occurred.
+   */
+
+  void renderErrorViewModelListener(@NotNull IErrorViewModel errorViewModel);
+
+
+  /**
+   * Starts the view.
+   */
+  void start();
+
+  /**
+   * Stops the view.
+   */
+  void stop();
+
+  /**
+   * Triggered when the game needs to be terminated.
+   *
+   * @param quit The quit event.
+   */
+
+  void quitListener(@NotNull IQuit quit);
+
 }
+
