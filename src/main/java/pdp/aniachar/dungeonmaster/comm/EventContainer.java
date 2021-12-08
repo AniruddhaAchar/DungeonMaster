@@ -24,4 +24,11 @@ public class EventContainer {
     return modelEventBus;
   }
 
+  /**
+   * Restarts the event bus for the model.
+   */
+  public static void reset() {
+    modelEventBus = null;
+  }
+
 }
