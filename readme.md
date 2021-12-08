@@ -29,8 +29,9 @@ two hits are needed.
 
 ## Features
 
-Ability for the location to what are the possible ways in which it's state can be changed. There is
-an overarching "Action" interface that will define the strategy that a specific component can take.
+Ability for the location to show what are the possible ways in which it's state can be changed.
+There is an overarching "Action" interface that will define the strategy that a specific component
+can take.
 
 Change in dynamic states in the game occurs through events. Events are published to an event bus and
 the subscribers to these events listen to specific events and take actions.
@@ -38,12 +39,19 @@ the subscribers to these events listen to specific events and take actions.
 There is a text view that is present game on a console. The controller has methods to getting help,
 moving the player and collecting objects.
 
+The GUI view provides an interface for the users to play the game using with audiovisual input. The
+user can visually explore the maze, collect items from the maze and kill monsters.
+
 ## How to run the jar
 
 Please have the META-INF folder in the same directory as DungeonMaster.jar.
 
 To run the jar, use the command
 `java -jar DungeonMaster.jar`
+
+This will bring up the GUI view. To get the CLI view, please run
+
+`hava -jar DungeonMaster.jar -cli`
 
 This will run the jar with the default settings. Please
 read [How to use the program](#how-to-use-the-program)
@@ -53,23 +61,24 @@ read [How to use the program](#how-to-use-the-program)
 The jar takes the following flags.
 
 ```
+-cli           Runs the CLI implementation of the game.
+      -debug         Debug mode.
       -dic, --degIntConn=<degreeOfInterConnections>
-                     Degree of inter-connectivity between the grid locations. (Default = 0)
+                     Degree of inter-connectivity between the grid locations.
   -h, --help         Show this help message and exit.
-  -mc, --maxcolumns=<maxCols>
-                     Maximum number of columns in the game. (Default = 10)
-  -mr, --maxrow=<maxRows>
-                     Maximum number of rows in the game. (Default = 10)
-  -pt, --perTreasure=<percentTreasure>
-                     Percentage of caves with treasure. (Default = 10)
+      -mc, --maxcolumns=<maxCols>
+                     Maximum number of columns in the game.
+      -mr, --maxrow=<maxRows>
+                     Maximum number of rows in the game.
+      -nm, --numberMonsters=<numberMonsters>
+                     Number of monsters in the game.
+      -pt, --perTreasure=<percentTreasure>
+                     Percentage of caves with treasure.
   -V, --version      Print version information and exit.
   -w, --iswrappeds   Make the grid wrapped or not.
-                     Adding this flag makes it wrapped.
-  -nm --numberMonsters Number of monsters in the game.
 ```
 
-To play the game, you can use the `help` command to get to know the commands needed to play the
-game.
+To play the CLI game, follow the instructions below.
 
 ```
 The game uses verb-[noun]+[qualifier] syntax for the command.
@@ -103,6 +112,34 @@ Valid directions are the same as above. Distance should be a positive integer.
 All these commands have a shorthand. Just use the first letter of the command.
 ```
 
+To play the GUI view
+
+1. To move the player:
+    1. To move the player, user can use the arrow keys. If the player can move in the specified
+       direction then the character on the screen is moved, else you will hear a `beep`.
+    2. To move the character using mouse, click on a grid location, if the player can move in that
+       direction, the player will move, else you hear a `beep`.
+2. To shoot arrows:
+    1. Right-click on the grid to bring up a context menu that will help you select the shoot
+       direction and distance.
+    2. Hit the `s` key and that will again bring the context menu to shoot. Here you can use
+       the `WASD` keys to select the directions. To select north, you can use `Alt + W` key.
+       Similarly, for the other directions as well.
+       ```
+       Shoot North -> S, Alt + W
+       Shoot South -> S, Alt + S
+       Shoot East -> S, Alt + D
+       Shoot West -> S, Alt + A
+   ```
+
+3. To pick treasures or arrow:
+    1. The location will have a chest.
+    2. Right click. if the pick context menu appears, you can pick a treasure or an arrow.
+    3. Hit P and the context menu comes up. This can be used to pick the item.
+
+4. To restart the game, go to the `Options` menu and select restart.
+5. To start a new game, go to the `Options` menu and select new game and fill the dialog box.
+
 ### Example runs
 
 ```
@@ -128,22 +165,13 @@ interconnectivity between caves is 1.
 
 ## Description of examples
 
-`killMonser.txt` A game play where the monster is killed.
-
-`killPlayer.txt` A game play where the player is killed by the monster.
-
-`pickArrow.txt` A game play where arrow is picked by the player.
-
-`winGame.txt` A game play where the player wins a game by entering the end cave.
-
-`pickTreasure.txt` A game play where a player picks up a treasure.
+`gameplay.png` shows how the game looks when some treasures/arrows are found and when a monster is
+detected.
 
 ## Design changes
 
-View and view model was implemented.
-New event driven model was implemented to handle dynamic actions in the game.
-Improved performance of the model end location selection by allowing better distance finding
-algorithm.
+The controller and the view are event driven. The controller and view publish and subscribe to
+events and act on these events.
 
 ## Assumption
 
@@ -173,8 +201,13 @@ This application cannot be run on a multithreaded system. States change with the
 there is only one manipulator state i.e. one thread. In a multithreaded process there would be wrong
 state update.
 
+The player should visit the location when to see if the smell changed.
+The view knows only about the current state of the player and is not
+aware of any other state changes that occurred.
+
 ## Citation
 
 * [Finding if graph is connected.](https://algorithms.tutorialhorizon.com/check-if-given-undirected-graph-is-connected-or-not/)
 * [Shortest path](https://www.geeksforgeeks.org/shortest-path-unweighted-graph/)
 * [Some help with graph.](https://gist.github.com/kevinmorio/f7102c5094aa748503f9)
+* [The player graphics.] (https://luizmelo.itch.io/huntress-2)
