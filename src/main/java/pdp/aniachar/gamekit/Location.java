@@ -44,5 +44,10 @@ public interface Location<T> extends ImmutableLocation<T> {
    */
   boolean removeItem(@NotNull Item itemToRemove);
 
+  /**
+   * Restart the game.
+   * Set location to its original state.
+   */
+  void restart();
 
 }
